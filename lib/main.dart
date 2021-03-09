@@ -57,7 +57,11 @@ class _RandomWordsState extends State<RandomWords> {
           appBar: AppBar(
             title: Text('Saved Suggestions'),
           ),
-          body: ListView(children: divided),
+          body: divided.length > 0
+              ? ListView(children: divided)
+              : Center(
+                  child: Text('There is no saved item.'),
+                ),
         );
       }),
     );
