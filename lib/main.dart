@@ -1,73 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
+import 'package:provider/provider.dart';
+import 'suggestions.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Welcome to Flutter',
-      theme: ThemeData(
-        primaryColor: Colors.white,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
+          value: Suggestions(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Welcome to Flutter',
+        theme: ThemeData(
+          primaryColor: Colors.white,
+        ),
+        home: RandomWords(),
       ),
-      home: RandomWords(),
     );
   }
 }
 
-class RandomWords extends StatefulWidget {
-  @override
-  _RandomWordsState createState() => _RandomWordsState();
-}
-
-class _RandomWordsState extends State<RandomWords> {
-  @override
-  final _suggestions = <WordPair>[];
+class RandomWords extends StatelessWidget {
   final _saved = <WordPair>{};
   final _biggerFont = TextStyle(fontSize: 18.0);
+
+  void _generateWordPairs(BuildContext context) {
+    Provider.of<Suggestions>(context, listen: false).createWordPairs();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    var suggestions = Provider.of<Suggestions>(context).getSuggestions;
     return Scaffold(
       appBar: AppBar(
         title: Text('Startup Name Generator'),
         actions: [
-          IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
+          IconButton(icon: Icon(Icons.list), onPressed: () {}),
         ],
       ),
-      body: _buildSuggestions(),
+      body: _buildSuggestions(suggestions),
     );
   }
 
-  void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (BuildContext context) {
-        final tiles = _saved.map((WordPair pair) {
-          return ListTile(
-            title: Text(
-              pair.asPascalCase,
-              style: _biggerFont,
-            ),
-          );
-        });
-        final divided = ListTile.divideTiles(
-          context: context,
-          tiles: tiles,
-        ).toList();
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('Saved Suggestions'),
-          ),
-          body: divided.length > 0
-              ? ListView(children: divided)
-              : Center(
-                  child: Text('There is no saved item.'),
-                ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildSuggestions() {
+  // void _pushSaved() {
+  //   Navigator.of(context).push(
+  //     MaterialPageRoute<void>(builder: (BuildContext context) {
+  //       final tiles = _saved.map((WordPair pair) {
+  //         return ListTile(
+  //           title: Text(
+  //             pair.asPascalCase,
+  //             style: _biggerFont,
+  //           ),
+  //         );
+  //       });
+  //       final divided = ListTile.divideTiles(
+  //         context: context,
+  //         tiles: tiles,
+  //       ).toList();
+  //       return Scaffold(
+  //         appBar: AppBar(
+  //           title: Text('Saved Suggestions'),
+  //         ),
+  //         body: divided.length > 0
+  //             ? ListView(children: divided)
+  //             : Center(
+  //           child: Text('There is no saved item.'),
+  //         ),
+  //       );
+  //     }),
+  //   );
+  // }
+  //
+  Widget _buildSuggestions(suggestions) {
     return ListView.builder(
         padding: EdgeInsets.all(16.0),
         itemBuilder: /*1*/ (context, i) {
@@ -76,33 +85,31 @@ class _RandomWordsState extends State<RandomWords> {
           }
 
           final index = i ~/ 2; /*3*/
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10)); /*4*/
+          if (index >= suggestions.length) {
+            suggestions.addAll(generateWordPairs().take(10)); /*4*/
           }
-          return _buildRow(_suggestions[index]);
+          return _buildRow(suggestions[index]);
         });
   }
 
   Widget _buildRow(WordPair pair) {
     final alreadySaved = _saved.contains(pair);
     return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-      ),
-      onTap: () {
-        setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
+        title: Text(
+          pair.asPascalCase,
+          style: _biggerFont,
+        ),
+        trailing: Icon(
+          alreadySaved ? Icons.favorite : Icons.favorite_border,
+          color: alreadySaved ? Colors.red : null,
+        ),
+        onTap: () {
+          // setState(() {
+          //   if (alreadySaved) {
+          //     _saved.remove(pair);
+          //   } else {
+          //     _saved.add(pair);
+          //   }
         });
-      },
-    );
   }
 }
