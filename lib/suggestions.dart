@@ -8,8 +8,7 @@ class Suggestions extends ChangeNotifier {
     return _suggestions;
   }
 
-  void createWordPairs() {
+  void addSuggestions() async {
     _suggestions.addAll(generateWordPairs().take(10));
-    notifyListeners();
   }
 }

@@ -8,8 +8,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(
-          value: Suggestions(),
+        ChangeNotifierProvider<Suggestions>(
+          create: (context) => Suggestions(),
         ),
       ],
       child: MaterialApp(
@@ -24,11 +24,10 @@ class MyApp extends StatelessWidget {
 }
 
 class RandomWords extends StatelessWidget {
-  final _saved = <WordPair>{};
   final _biggerFont = TextStyle(fontSize: 18.0);
 
-  void _generateWordPairs(BuildContext context) {
-    Provider.of<Suggestions>(context, listen: false).createWordPairs();
+  void _addSuggestions(BuildContext context) async {
+    Provider.of<Suggestions>(context, listen: false).addSuggestions();
   }
 
   @override
@@ -55,30 +54,22 @@ class RandomWords extends StatelessWidget {
 
           final index = i ~/ 2; /*3*/
           if (index >= suggestions.length) {
-            suggestions.addAll(generateWordPairs().take(10)); /*4*/
+            _addSuggestions(context);
           }
           return _buildRow(suggestions[index]);
         });
   }
 
   Widget _buildRow(WordPair pair) {
-    final alreadySaved = _saved.contains(pair);
     return ListTile(
-        title: Text(
-          pair.asPascalCase,
-          style: _biggerFont,
-        ),
-        trailing: Icon(
-          alreadySaved ? Icons.favorite : Icons.favorite_border,
-          color: alreadySaved ? Colors.red : null,
-        ),
-        onTap: () {
-          // setState(() {
-          //   if (alreadySaved) {
-          //     _saved.remove(pair);
-          //   } else {
-          //     _saved.add(pair);
-          //   }
-        });
+      title: Text(
+        pair.asPascalCase,
+        style: _biggerFont,
+      ),
+      trailing: Icon(
+        Icons.favorite_border,
+        color: null,
+      ),
+    );
   }
 }
